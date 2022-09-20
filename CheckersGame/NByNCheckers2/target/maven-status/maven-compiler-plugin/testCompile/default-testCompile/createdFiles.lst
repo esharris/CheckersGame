@@ -1,7 +1,0 @@
-com/earl/nbyncheckers/input/impl/TestYesOrNoCommandInputImpl.class
-com/earl/nbyncheckers/input/impl/TestPostCommandInputImpl.class
-com/earl/nbyncheckers/displayers/impl/TestColoredConsoleCheckerDisplayer.class
-com/earl/nbyncheckers/input/impl/TestMultiCommandInputImpl.class
-com/earl/nbyncheckers/displayers/impl/TestColoredConsoleCellDisplayer.class
-com/earl/nbyncheckers/input/impl/TestPreCommandInputImpl.class
-com/earl/nbyncheckers/base/TestCoordinateUtils.class
