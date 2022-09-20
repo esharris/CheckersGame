@@ -1,0 +1,10 @@
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/MoveManager.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/UnexpectedCellException.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/GameRules.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/base/BoardCoordinate.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/impl/GameRulesImpl.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/impl/MoveManagerImpl.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/CoordinateNotOnBoardExcepton.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/AccessedIllegalCellException.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/CellIsOccupiedException.java
+/Users/earlharris/eclipse-workspace/CheckersGame/NByNGameRules/src/main/java/com/earl/nbyngamerules/IncorrectDestinationException.java
