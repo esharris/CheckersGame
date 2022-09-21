@@ -226,10 +226,11 @@ public class Checkers2 {
 							}
 						}
 
-					});
+					} // action listener declaration
+					);
 					frame.add(checkerButtonArray[j]);
-				}
-			}
+				} // for
+			} // for
 
 			turnHeaderLabel.setBounds(OTHER_BUTTON_COL, 10, OTHER_BUTTON_WIDTH / 2, OTHER_BUTTON_LENGTH / 2);
 			frame.add(turnHeaderLabel);
@@ -275,7 +276,8 @@ public class Checkers2 {
 
 				}
 
-			});
+			} // action listener declaration
+			);
 			frame.add(doneButton);
 
 			undoButton.setBounds(OTHER_BUTTON_COL, 110, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
@@ -307,7 +309,8 @@ public class Checkers2 {
 						break;
 					}
 				}
-			});
+			} // action listener declaration
+			);
 			frame.add(undoButton);
 
 			resignButton.setBounds(OTHER_BUTTON_COL, 160, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
@@ -327,7 +330,6 @@ public class Checkers2 {
 						resetButton.setEnabled(true);
 					}
 				}
-
 			});
 			frame.add(resignButton);
 
@@ -338,7 +340,6 @@ public class Checkers2 {
 				public void actionPerformed(ActionEvent e) {
 					newGame(gameRules, moveManager);
 				}
-
 			});
 			frame.add(resetButton);
 
@@ -363,9 +364,7 @@ public class Checkers2 {
 						drawButton.setEnabled(false);
 						resetButton.setEnabled(true);
 					}
-
 				}
-
 			});
 			frame.add(drawButton);
 
@@ -445,8 +444,8 @@ public class Checkers2 {
 				} else {
 					checkerButtonArray[j].setIcon(null);
 				}
-			}
-		}
+			} // for
+		} // for
 	}
 
 	/**
