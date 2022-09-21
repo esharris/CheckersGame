@@ -77,6 +77,7 @@ public class Checkers2 {
 
 	private static final JLabel turnHeaderLabel = new JLabel("Turn:");
 	private static final JLabel turnLabel = new JLabel();
+	private static final JLabel countDownLabel = new JLabel();
 
 	private static final JButton doneButton = new JButton("DONE");
 	private static final JButton undoButton = new JButton("UNDO");
@@ -239,6 +240,10 @@ public class Checkers2 {
 					OTHER_BUTTON_LENGTH / 2);
 			frame.add(turnLabel);
 
+			countDownLabel.setBounds(OTHER_BUTTON_COL, 20, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
+			countDownLabel.setText("Under construction.");
+			frame.add(countDownLabel);
+
 			doneButton.setBounds(OTHER_BUTTON_COL, 60, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
 			doneButton.addActionListener(new ActionListener() {
 
@@ -273,7 +278,6 @@ public class Checkers2 {
 					default:
 						break;
 					}
-
 				}
 
 			} // action listener declaration

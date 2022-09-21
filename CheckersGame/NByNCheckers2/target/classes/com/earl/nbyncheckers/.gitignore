@@ -1,0 +1,9 @@
+/.DS_Store
+/Checkers.class
+/GameIsDrawException.class
+/NByNCheckers.class
+/ResignFromGameException.class
+/TestMultiCommandInputImpl.class
+/TestPostCommandInputImpl.class
+/TestPreCommandInputImpl.class
+/TestYesOrNoCommandInputImpl.class

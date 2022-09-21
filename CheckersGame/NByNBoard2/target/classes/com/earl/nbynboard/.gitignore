@@ -1,0 +1,12 @@
+/Board.class
+/BoardCreator.class
+/BoardRow.class
+/Cell.class
+/CellNotOccupiedException.class
+/Checker.class
+/CheckerColor.class
+/CheckerRank.class
+/MathUtils.class
+/OddColumnLengthException.class
+/UnrecognizedCheckerColorException.class
+/UnrecognizedCheckerRankException.class
