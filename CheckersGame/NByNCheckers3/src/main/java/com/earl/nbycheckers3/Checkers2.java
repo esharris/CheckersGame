@@ -243,7 +243,7 @@ public class Checkers2 {
 												refreshGUIBoard(gameRules);
 												if (moveManager.canMakeAJump(board, destinationCoordinate,
 														currentPlayer)) {
-													waitForSubsequentMoveCoordinate();
+													waitForSubsequentMoveCoordinate(false);
 												} else {
 													moveVerdict();
 												}
@@ -285,7 +285,7 @@ public class Checkers2 {
 											boardCoordinateStack
 													.push(new BoardCoordinate(localSavedBoard, sourceCoordinate));
 											if (moveManager.canMakeAJump(board, destinationCoordinate, currentPlayer)) {
-												waitForSubsequentMoveCoordinate();
+												waitForSubsequentMoveCoordinate(false);
 											} else {
 												moveVerdict();
 											}
@@ -389,7 +389,7 @@ public class Checkers2 {
 									sourceCoordinate = boardCoordinate.getCoordinate();
 									refreshGUIBoard(gameRules);
 									boardCoordinateStack.pop();
-									waitForSubsequentMoveCoordinate();
+									waitForSubsequentMoveCoordinate(true);
 								}
 								break;
 							default:
@@ -578,9 +578,16 @@ public class Checkers2 {
 		}
 	}
 
-	private static void waitForSubsequentMoveCoordinate() {
+	private static void waitForSubsequentMoveCoordinate(boolean fromUndo) {
 		gameState = GameState.WAIT_FOR_SUBSEQUENT_MOVE_COORDINATE;
-		sourceCoordinate = destinationCoordinate;
+		/**
+		 * When ! fromUndo, we need to “move forward” and update the sourceCoordinate.
+		 * Otherwise, the stack has already set sourceCoordinate and it doesn’t need to
+		 * change.
+		 */
+		if (!fromUndo) {
+			sourceCoordinate = destinationCoordinate;
+		}
 		doneButton.setEnabled(false);
 		undoButton.setEnabled(true);
 		messageLabel.setText("You must make another jump.");
