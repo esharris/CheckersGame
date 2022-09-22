@@ -30,7 +30,8 @@ import com.earl.utilities.Coordinate;
 public class Checkers2 {
 
 	/**
-	 * The length of a side of a checker board.
+	 * The number of tiles on a side of a checker board (vertically and
+	 * horizontally).
 	 */
 	private static final int SIDE_LENGTH = 8;
 
@@ -40,12 +41,17 @@ public class Checkers2 {
 	private static final int ROWS_INITIALIZED = 3;
 
 	/**
-	 * The length of a side of a checker button.
+	 * Margins for the frame.
+	 */
+	private static final int LEFT_MARGIN = 10;
+	private static final int TOP_MARGIN = 10;
+	/**
+	 * The length of a side of a (graphical) checker button.
 	 */
 	private static final int CHECKER_BUTTON_SIDE_LENGTH = 100;
 
 	/**
-	 * The column for the other buttons
+	 * The column for the other buttons (to the right of the (graphical) board.
 	 */
 	private static final int OTHER_BUTTON_COL = 860;
 
@@ -55,6 +61,9 @@ public class Checkers2 {
 	private static final int OTHER_BUTTON_WIDTH = 100;
 	private static final int OTHER_BUTTON_LENGTH = 50;
 
+	/**
+	 * Icons represent various types of checkers.
+	 */
 	private static final Icon RED_REGULAR_ICON = new ImageIcon("src/main/resources/redRegular.jpg");
 	private static final Icon RED_KING_ICON = new ImageIcon("src/main/resources/redKing.jpg");
 	private static final Icon BLACK_REGULAR_ICON = new ImageIcon("src/main/resources/blackRegular.jpg");
@@ -71,37 +80,89 @@ public class Checkers2 {
 	private static final int MESSAGE_LABEL_WIDTH = 800;
 	private static final int MESSAGE_LABEL_HEIGHT = 20;
 
+	/**
+	 * The number of seconds allocated to a single turn of the game.
+	 */
+	private static final long DURATION = 60;
+
 	private static final JFrame frame = new JFrame();
 
+	/**
+	 * These represent the legal tiles on our (graphical) checker board.
+	 */
 	private static final JButton[][] checkerButton2DArray = new JButton[SIDE_LENGTH][SIDE_LENGTH / 2];
 
+	/**
+	 * Designates whose turn if is (Red or Black).
+	 */
 	private static final JLabel turnHeaderLabel = new JLabel("Turn:");
 	private static final JLabel turnLabel = new JLabel();
+
+	/**
+	 * Indicates how much time is left in the turn?
+	 */
 	private static final JLabel countDownLabel = new JLabel();
 
+	/**
+	 * The buttons to the right of the (graphical) checker board.
+	 */
 	private static final JButton doneButton = new JButton("DONE");
 	private static final JButton undoButton = new JButton("UNDO");
 	private static final JButton resignButton = new JButton("RESIGN");
 	private static final JButton resetButton = new JButton("RESET");
 	private static final JButton drawButton = new JButton("DRAW");
 
+	/**
+	 * Displays informational messages to the player.
+	 */
 	private static final JLabel messageHeaderLabel = new JLabel("Message: ");
-
 	private static final JLabel messageLabel = new JLabel();
 
+	/**
+	 * Displays error messages to the player.
+	 */
 	private static final JLabel errorHeaderLabel = new JLabel("Error: ");
-
 	private static final JLabel errorLabel = new JLabel();
 
 	private static Board board = new Board(SIDE_LENGTH, SIDE_LENGTH, true);
 	private static CheckerColor currentPlayer;
+	/**
+	 * Does this turn have a piece where the current player can jump?
+	 */
 	private static boolean thereIsAJump;
 	private static GameState gameState;
+	private static boolean timedOut;
+
+	/**
+	 * The location of the first click on the board.
+	 */
 	private static Coordinate sourceCoordinate;
+
+	/**
+	 * The location of the second click on the board.
+	 */
 	private static Coordinate destinationCoordinate;
 
+	/**
+	 * The saved board, before a move. It is used to perform an undo.
+	 */
 	private static Board savedBoard;
+
+	/**
+	 * The saved board and current coordinate, before a multi-jump. It is used to
+	 * perform undoes.
+	 */
 	private static Stack<BoardCoordinate> boardCoordinateStack;
+
+	/**
+	 * How much time is left in the turn?
+	 */
+	private static Countdown countdown;
+
+	/**
+	 * Used to support mutual exclusion between the game and the countdown.
+	 */
+	private static Object theMonitor = new Object();
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -118,18 +179,26 @@ public class Checkers2 {
 			 * Initialize buttons in button2DArray
 			 */
 			for (int i = 0; i < SIDE_LENGTH; i++) {
+				/**
+				 * We start from the last row and work backwards. I'm not sure why.
+				 */
 				int i1 = SIDE_LENGTH - 1 - i;
 				JButton[] checkerButtonArray = checkerButton2DArray[i1];
 				for (int j = 0; j < SIDE_LENGTH / 2; j++) {
 					checkerButtonArray[j] = new JButton();
 					checkerButtonArray[j].setBounds(
-							10 + 2 * CHECKER_BUTTON_SIDE_LENGTH * j + (i1 % 2 == 0 ? 0 : CHECKER_BUTTON_SIDE_LENGTH),
-							10 + CHECKER_BUTTON_SIDE_LENGTH * i, CHECKER_BUTTON_SIDE_LENGTH,
+							LEFT_MARGIN + 2 * CHECKER_BUTTON_SIDE_LENGTH * j
+									+ (i1 % 2 == 0 ? 0 : CHECKER_BUTTON_SIDE_LENGTH),
+							TOP_MARGIN + CHECKER_BUTTON_SIDE_LENGTH * i, CHECKER_BUTTON_SIDE_LENGTH,
 							CHECKER_BUTTON_SIDE_LENGTH);
 					checkerButtonArray[j].addActionListener(new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
+							/**
+							 * Set i and j to the row and column of the designation tile/button in the 2D
+							 * array.
+							 */
 							int i = 0;
 							int j = 0;
 							boolean found = false;
@@ -148,196 +217,207 @@ public class Checkers2 {
 								}
 							}
 							final Coordinate currentCoordinate = buttonIndicesToBoardCoordinate(i, j);
-							switch (gameState) {
-							case WAIT_FOR_1ST_MOVE_COORDINATE:
-								Cell cell = gameRules.get(board, currentCoordinate);
-								if (cell.isOccupied() && cell.getChecker().getCheckerColor() == currentPlayer) {
-									sourceCoordinate = currentCoordinate;
-									gameState = GameState.WAIT_FOR_2ND_MOVE_COORDINATE;
-									messageLabel.setText("Where do you want the checker to go?");
-									errorLabel.setText("");
-								} else {
-									waitFor1stMoveCoordinate();
-									errorLabel.setText("That cell doesn't have a " + currentPlayer + " checker");
-								}
-								break;
-							case WAIT_FOR_2ND_MOVE_COORDINATE:
-								destinationCoordinate = currentCoordinate;
-								if (thereIsAJump) {
-									savedBoard = board.copy();
-									try {
-										moveManager.jump(board, sourceCoordinate, currentPlayer, destinationCoordinate);
-										refreshGUIBoard(gameRules);
-										if (moveManager.canMakeAJump(board, destinationCoordinate, currentPlayer)) {
-											waitForSubsequentMoveCoordinate();
+							synchronized (theMonitor) {
+								if (!timedOut) {
+									switch (gameState) {
+									case WAIT_FOR_1ST_MOVE_COORDINATE:
+										Cell cell = gameRules.get(board, currentCoordinate);
+										if (cell.isOccupied() && cell.getChecker().getCheckerColor() == currentPlayer) {
+											sourceCoordinate = currentCoordinate;
+											gameState = GameState.WAIT_FOR_2ND_MOVE_COORDINATE;
+											messageLabel.setText("Where do you want the checker to go?");
+											errorLabel.setText("");
 										} else {
-											moveVerdict();
+											waitFor1stMoveCoordinate();
+											errorLabel
+													.setText("That cell doesn't have a " + currentPlayer + " checker");
 										}
-									} catch (UnexpectedCellException e1) {
-										handleUnexpectedCellException(e1);
-										waitFor1stMoveCoordinate();
-									} catch (IncorrectDestinationException e1) {
-										handelIncorrectDestinationException(e1);
-										waitFor1stMoveCoordinate();
-									} catch (CellIsOccupiedException e1) {
-										handleCellIsOccupiedException(e1);
-										waitFor1stMoveCoordinate();
-									}
-								} else {
-									try {
-										savedBoard = board.copy();
-										moveManager.move(board, sourceCoordinate, currentPlayer, destinationCoordinate);
+										break;
+									case WAIT_FOR_2ND_MOVE_COORDINATE:
+										destinationCoordinate = currentCoordinate;
+										if (thereIsAJump) {
+											savedBoard = board.copy();
+											try {
+												moveManager.jump(board, sourceCoordinate, currentPlayer,
+														destinationCoordinate);
+												refreshGUIBoard(gameRules);
+												if (moveManager.canMakeAJump(board, destinationCoordinate,
+														currentPlayer)) {
+													waitForSubsequentMoveCoordinate();
+												} else {
+													moveVerdict();
+												}
+											} catch (UnexpectedCellException e1) {
+												handleUnexpectedCellException(e1);
+												waitFor1stMoveCoordinate();
+											} catch (IncorrectDestinationException e1) {
+												handelIncorrectDestinationException(e1);
+												waitFor1stMoveCoordinate();
+											} catch (CellIsOccupiedException e1) {
+												handleCellIsOccupiedException(e1);
+												waitFor1stMoveCoordinate();
+											}
+										} else {
+											try {
+												savedBoard = board.copy();
+												moveManager.move(board, sourceCoordinate, currentPlayer,
+														destinationCoordinate);
+												refreshGUIBoard(gameRules);
+												moveVerdict();
+											} catch (UnexpectedCellException e1) {
+												handleUnexpectedCellException(e1);
+												waitFor1stMoveCoordinate();
+											} catch (IncorrectDestinationException e1) {
+												handelIncorrectDestinationException(e1);
+												waitFor1stMoveCoordinate();
+											} catch (CellIsOccupiedException e1) {
+												handleCellIsOccupiedException(e1);
+												waitFor1stMoveCoordinate();
+											}
+										}
+										break;
+									case WAIT_FOR_SUBSEQUENT_MOVE_COORDINATE:
+										destinationCoordinate = currentCoordinate;
+										try {
+											final Board localSavedBoard = board.copy();
+											moveManager.jump(board, sourceCoordinate, currentPlayer,
+													destinationCoordinate);
+											boardCoordinateStack
+													.push(new BoardCoordinate(localSavedBoard, sourceCoordinate));
+											if (moveManager.canMakeAJump(board, destinationCoordinate, currentPlayer)) {
+												waitForSubsequentMoveCoordinate();
+											} else {
+												moveVerdict();
+											}
+										} catch (UnexpectedCellException e1) {
+											handleUnexpectedCellException(e1);
+										} catch (IncorrectDestinationException e1) {
+											handelIncorrectDestinationException(e1);
+										} catch (CellIsOccupiedException e1) {
+											handleCellIsOccupiedException(e1);
+										}
 										refreshGUIBoard(gameRules);
-										moveVerdict();
-									} catch (UnexpectedCellException e1) {
-										handleUnexpectedCellException(e1);
-										waitFor1stMoveCoordinate();
-									} catch (IncorrectDestinationException e1) {
-										handelIncorrectDestinationException(e1);
-										waitFor1stMoveCoordinate();
-									} catch (CellIsOccupiedException e1) {
-										handleCellIsOccupiedException(e1);
-										waitFor1stMoveCoordinate();
-									}
-								}
-								break;
-							case WAIT_FOR_SUBSEQUENT_MOVE_COORDINATE:
-								destinationCoordinate = currentCoordinate;
-								try {
-									final Board localSavedBoard = board.copy();
-									moveManager.jump(board, sourceCoordinate, currentPlayer, destinationCoordinate);
-									boardCoordinateStack.push(new BoardCoordinate(localSavedBoard, sourceCoordinate));
-									if (moveManager.canMakeAJump(board, destinationCoordinate, currentPlayer)) {
-										waitForSubsequentMoveCoordinate();
-									} else {
-										moveVerdict();
-									}
-								} catch (UnexpectedCellException e1) {
-									handleUnexpectedCellException(e1);
-								} catch (IncorrectDestinationException e1) {
-									handelIncorrectDestinationException(e1);
-								} catch (CellIsOccupiedException e1) {
-									handleCellIsOccupiedException(e1);
-								}
-								refreshGUIBoard(gameRules);
-								break;
-							default:
-								// ignore other states
-								break;
-							}
+										break;
+									default:
+										// ignore other states
+										break;
+									} // switch
+								} // if
+							} // synchronized
 						}
-
 					} // action listener declaration
 					);
 					frame.add(checkerButtonArray[j]);
 				} // for
 			} // for
 
-			turnHeaderLabel.setBounds(OTHER_BUTTON_COL, 10, OTHER_BUTTON_WIDTH / 2, OTHER_BUTTON_LENGTH / 2);
+			turnHeaderLabel.setBounds(OTHER_BUTTON_COL, TOP_MARGIN, OTHER_BUTTON_WIDTH / 2, OTHER_BUTTON_LENGTH / 2);
 			frame.add(turnHeaderLabel);
 
-			turnLabel.setBounds(OTHER_BUTTON_COL + OTHER_BUTTON_WIDTH / 2, 10, OTHER_BUTTON_WIDTH / 2,
+			turnLabel.setBounds(OTHER_BUTTON_COL + OTHER_BUTTON_WIDTH / 2, TOP_MARGIN, OTHER_BUTTON_WIDTH / 2,
 					OTHER_BUTTON_LENGTH / 2);
 			frame.add(turnLabel);
 
-			countDownLabel.setBounds(OTHER_BUTTON_COL, 20, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
-			countDownLabel.setText("Under construction.");
+			countDownLabel.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 10, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
 			frame.add(countDownLabel);
 
-			doneButton.setBounds(OTHER_BUTTON_COL, 60, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
+			doneButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 50, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
 			doneButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					switch (gameState) {
-					case WAIT_FOR_1ST_MOVE_COORDINATE:
-					case WAIT_FOR_2ND_MOVE_COORDINATE:
-						errorLabel.setText("System error: done button should be disabled.");
-						break;
-					case MOVE_VERDICT:
-						if (gameRules.isWinner(board, currentPlayer)) {
-							gameState = GameState.GAME_OVER;
-							messageLabel.setText(currentPlayer + " has won.");
-							errorLabel.setText("");
-							doneButton.setEnabled(false);
-							undoButton.setEnabled(false);
-							resignButton.setEnabled(false);
-							resetButton.setEnabled(true);
-							drawButton.setEnabled(false);
-						} else {
-							// opponent's turn.
-							currentPlayer = gameRules.getOpponent(currentPlayer);
-							turnLabel.setText(currentPlayer.toString());
-							board = board.flip();
-							thereIsAJump = moveManager.thereIsAJump(board, currentPlayer);
-							boardCoordinateStack = new Stack<>();
-							refreshGUIBoard(gameRules);
-							waitFor1stMoveCoordinate();
-						}
-						break;
-					default:
-						break;
-					}
+					synchronized (theMonitor) {
+						if (!timedOut) {
+							switch (gameState) {
+							case WAIT_FOR_1ST_MOVE_COORDINATE:
+							case WAIT_FOR_2ND_MOVE_COORDINATE:
+								errorLabel.setText("System error: done button should be disabled.");
+								break;
+							case MOVE_VERDICT:
+								if (gameRules.isWinner(board, currentPlayer)) {
+									gameState = GameState.GAME_OVER;
+									messageLabel.setText(currentPlayer + " has won.");
+									errorLabel.setText("");
+									doneButton.setEnabled(false);
+									undoButton.setEnabled(false);
+									resignButton.setEnabled(false);
+									resetButton.setEnabled(true);
+									drawButton.setEnabled(false);
+								} else {
+									// opponent's turn.
+									countdown.reset();
+									currentPlayer = gameRules.getOpponent(currentPlayer);
+									turnLabel.setText(currentPlayer.toString());
+									board = board.flip();
+									thereIsAJump = moveManager.thereIsAJump(board, currentPlayer);
+									boardCoordinateStack = new Stack<>();
+									refreshGUIBoard(gameRules);
+									waitFor1stMoveCoordinate();
+								}
+								break;
+							default:
+								break;
+							} // switch
+						} // if
+					} // synchronized
 				}
-
 			} // action listener declaration
 			);
 			frame.add(doneButton);
 
-			undoButton.setBounds(OTHER_BUTTON_COL, 110, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
+			undoButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 100, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
 			undoButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					switch (gameState) {
-					case WAIT_FOR_1ST_MOVE_COORDINATE:
-					case WAIT_FOR_2ND_MOVE_COORDINATE:
-						errorLabel.setText("System error: button should have been disabled.");
-						break;
-					case MOVE_VERDICT:
-					case WAIT_FOR_SUBSEQUENT_MOVE_COORDINATE:
-						if (boardCoordinateStack.isEmpty()) {
-							board = savedBoard;
-							refreshGUIBoard(gameRules);
-							waitFor1stMoveCoordinate();
-						} else {
-							final BoardCoordinate boardCoordinate = boardCoordinateStack.peek();
-							board = boardCoordinate.getBoard();
-							sourceCoordinate = boardCoordinate.getCoordinate();
-							refreshGUIBoard(gameRules);
-							boardCoordinateStack.pop();
-							waitForSubsequentMoveCoordinate();
-						}
-						break;
-					default:
-						break;
-					}
-				}
+					synchronized (theMonitor) {
+						if (!timedOut) {
+							switch (gameState) {
+							case WAIT_FOR_1ST_MOVE_COORDINATE:
+							case WAIT_FOR_2ND_MOVE_COORDINATE:
+								errorLabel.setText("System error: button should have been disabled.");
+								break;
+							case MOVE_VERDICT:
+							case WAIT_FOR_SUBSEQUENT_MOVE_COORDINATE:
+								if (boardCoordinateStack.isEmpty()) {
+									board = savedBoard;
+									refreshGUIBoard(gameRules);
+									waitFor1stMoveCoordinate();
+								} else {
+									final BoardCoordinate boardCoordinate = boardCoordinateStack.peek();
+									board = boardCoordinate.getBoard();
+									sourceCoordinate = boardCoordinate.getCoordinate();
+									refreshGUIBoard(gameRules);
+									boardCoordinateStack.pop();
+									waitForSubsequentMoveCoordinate();
+								}
+								break;
+							default:
+								break;
+							} // switch
+						} // if
+					} // synchronize
+				} // action performed
 			} // action listener declaration
 			);
 			frame.add(undoButton);
 
-			resignButton.setBounds(OTHER_BUTTON_COL, 160, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
+			resignButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 150, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
 			resignButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					int result = JOptionPane.showConfirmDialog(null, "Are you sure?");
 					if (result == JOptionPane.YES_NO_OPTION) {
-						gameState = GameState.GAME_OVER;
-						messageLabel.setText(
-								currentPlayer + " has resigned. " + gameRules.getOpponent(currentPlayer) + " has won.");
-						errorLabel.setText("");
-						doneButton.setEnabled(false);
-						undoButton.setEnabled(false);
-						resignButton.setEnabled(false);
-						resetButton.setEnabled(true);
+						synchronized (theMonitor) {
+							resignGame(gameRules, "resigned");
+						}
 					}
 				}
 			});
 			frame.add(resignButton);
 
-			resetButton.setBounds(OTHER_BUTTON_COL, 210, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
+			resetButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 200, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
 			resetButton.addActionListener(new ActionListener() {
 
 				@Override
@@ -354,30 +434,37 @@ public class Checkers2 {
 				public void actionPerformed(ActionEvent e) {
 					board = board.flip();
 					refreshGUIBoard(gameRules);
+					countdown.pause();
 					int result = JOptionPane.showConfirmDialog(null,
 							gameRules.getOpponent(currentPlayer) + " would you accept a draw?");
 					board = board.flip();
 					refreshGUIBoard(gameRules);
 					if (result == JOptionPane.YES_NO_OPTION) {
-						gameState = GameState.GAME_OVER;
-						messageLabel.setText("The game ends in a draw.");
-						errorLabel.setText("");
-						doneButton.setEnabled(false);
-						undoButton.setEnabled(false);
-						resignButton.setEnabled(false);
-						drawButton.setEnabled(false);
-						resetButton.setEnabled(true);
+						synchronized (theMonitor) {
+							gameState = GameState.GAME_OVER;
+							messageLabel.setText("The game ends in a draw.");
+							errorLabel.setText("");
+							doneButton.setEnabled(false);
+							undoButton.setEnabled(false);
+							resignButton.setEnabled(false);
+							drawButton.setEnabled(false);
+							resetButton.setEnabled(true);
+							countdown.stop();
+						}
+					} else {
+						countdown.resume();
 					}
 				}
 			});
 			frame.add(drawButton);
 
-			messageHeaderLabel.setBounds(10, MESSAGE_LABEL_ROW, 100, MESSAGE_LABEL_HEIGHT);
+			messageHeaderLabel.setBounds(LEFT_MARGIN, MESSAGE_LABEL_ROW, 100, MESSAGE_LABEL_HEIGHT);
 			frame.add(messageHeaderLabel);
 			messageLabel.setBounds(110, MESSAGE_LABEL_ROW, MESSAGE_LABEL_WIDTH, MESSAGE_LABEL_HEIGHT);
 			frame.add(messageLabel);
 
-			errorHeaderLabel.setBounds(10, MESSAGE_LABEL_ROW + MESSAGE_LABEL_HEIGHT, 100, MESSAGE_LABEL_HEIGHT);
+			errorHeaderLabel.setBounds(LEFT_MARGIN, MESSAGE_LABEL_ROW + MESSAGE_LABEL_HEIGHT, 100,
+					MESSAGE_LABEL_HEIGHT);
 			frame.add(errorHeaderLabel);
 			errorLabel.setBounds(110, MESSAGE_LABEL_ROW + MESSAGE_LABEL_HEIGHT, MESSAGE_LABEL_WIDTH,
 					MESSAGE_LABEL_HEIGHT);
@@ -410,6 +497,25 @@ public class Checkers2 {
 		thereIsAJump = moveManager.thereIsAJump(board, currentPlayer);
 		boardCoordinateStack = new Stack<>();
 		waitFor1stMoveCoordinate();
+		timedOut = false;
+		if (countdown != null) {
+			countdown.stop();
+		}
+		countdown = new Countdown(DURATION, countDownLabel, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				synchronized (theMonitor) {
+					if (!timedOut) {
+						if (gameState != GameState.GAME_OVER) {
+							resignGame(gameRules, "timed out");
+						}
+						timedOut = true;
+					}
+				}
+			}
+		});
+		countdown.start();
 	}
 
 	private static Coordinate buttonIndicesToBoardCoordinate(int i, int j) {
@@ -418,6 +524,9 @@ public class Checkers2 {
 
 	private static void refreshGUIBoard(GameRules gameRules) {
 		for (int i = 0; i < SIDE_LENGTH; i++) {
+			/**
+			 * We start from the last row and work backwards. I'm not sure why.
+			 */
 			int i1 = SIDE_LENGTH - 1 - i;
 			JButton[] checkerButtonArray = checkerButton2DArray[i1];
 			for (int j = 0; j < SIDE_LENGTH / 2; j++) {
@@ -486,6 +595,23 @@ public class Checkers2 {
 		messageLabel.setText("Are you satisfied with your move?");
 		doneButton.setEnabled(true);
 		undoButton.setEnabled(true);
+	}
+
+	/**
+	 * @param gameRules
+	 * @param event
+	 */
+	private static void resignGame(final GameRules gameRules, String event) {
+		gameState = GameState.GAME_OVER;
+		messageLabel
+				.setText(currentPlayer + " has " + event + ". " + gameRules.getOpponent(currentPlayer) + " has won.");
+		errorLabel.setText("");
+		doneButton.setEnabled(false);
+		undoButton.setEnabled(false);
+		resignButton.setEnabled(false);
+		resetButton.setEnabled(true);
+		drawButton.setEnabled(false);
+		countdown.stop();
 	}
 
 	private static void handleUnexpectedCellException(UnexpectedCellException e) {
