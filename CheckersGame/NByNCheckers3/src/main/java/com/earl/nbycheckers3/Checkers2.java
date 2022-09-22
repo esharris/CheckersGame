@@ -343,6 +343,7 @@ public class Checkers2 {
 									resignButton.setEnabled(false);
 									resetButton.setEnabled(true);
 									drawButton.setEnabled(false);
+									countdown.stop();
 								} else {
 									// opponent's turn.
 									countdown.reset();
