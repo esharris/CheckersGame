@@ -1,5 +1,9 @@
 package com.earl.nbynboard;
 
+/**
+ * 
+ * @author earlharris
+ */
 public class BoardCreator {
 
 	public Board create(String[] b, boolean bottomLeftColored) {
