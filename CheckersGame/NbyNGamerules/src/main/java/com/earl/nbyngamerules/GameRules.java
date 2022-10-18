@@ -6,6 +6,10 @@ import com.earl.nbynboard.Cell;
 import com.earl.nbynboard.CheckerColor;
 import com.earl.utilities.Coordinate;
 
+/**
+ * 
+ * @author earlharris
+ */
 public interface GameRules {
 
 	CheckerColor getOpponent(CheckerColor checkerColor);

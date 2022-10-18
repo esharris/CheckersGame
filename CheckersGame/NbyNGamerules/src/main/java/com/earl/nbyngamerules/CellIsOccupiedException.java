@@ -3,6 +3,10 @@ package com.earl.nbyngamerules;
 import com.earl.nbynboard.Cell;
 import com.earl.utilities.Coordinate;
 
+/**
+ * 
+ * @author earlharris
+ */
 public class CellIsOccupiedException extends Exception {
 
 	private static final long serialVersionUID = 3295922027765526081L;
@@ -10,6 +14,11 @@ public class CellIsOccupiedException extends Exception {
 	private final Cell cell;
 	private final Coordinate destinationCoordinate;
 
+        /**
+         * 
+         * @param cell
+         * @param destinationCoordinate 
+         */
 	public CellIsOccupiedException(Cell cell, Coordinate destinationCoordinate) {
 		super("Expected empty cell at " + destinationCoordinate + ", but saw " + cell + ".");
 		this.cell = cell;

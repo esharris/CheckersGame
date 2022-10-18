@@ -4,6 +4,10 @@ import com.earl.nbynboard.Checker;
 import com.earl.nbynboard.CheckerRank;
 import com.earl.utilities.Coordinate;
 
+/**
+ * 
+ * @author earlharris
+ */
 public class IncorrectDestinationException extends Exception {
 
 	private static final long serialVersionUID = 4711929451581939078L;
@@ -15,6 +19,15 @@ public class IncorrectDestinationException extends Exception {
 	private final int changeX;
 	private final int changeY;
 
+        /**
+         * 
+         * @param checker
+         * @param distance
+         * @param coordinate
+         * @param destinationCoordinate
+         * @param changeX
+         * @param changeY 
+         */
 	public IncorrectDestinationException(Checker checker, int distance, Coordinate coordinate,
 			Coordinate destinationCoordinate, int changeX, int changeY) {
 		super("Can only move " + (checker.getCheckerRank() == CheckerRank.REGULAR ? "forward " : "") + "on a diagonal "

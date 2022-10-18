@@ -4,6 +4,10 @@ import com.earl.nbynboard.Board;
 import com.earl.nbynboard.CheckerColor;
 import com.earl.utilities.Coordinate;
 
+/**
+ * 
+ * @author earlharris
+ */
 public interface MoveManager {
 
 	/**
@@ -58,9 +62,23 @@ public interface MoveManager {
 	void move(Board board, Coordinate coordinate, CheckerColor checkerColor, Coordinate destinationCoordinate)
 			throws UnexpectedCellException, IncorrectDestinationException, CellIsOccupiedException;
 
+        /**
+         * 
+         * @param board
+         * @param coordinate
+         * @param checkerColor
+         * @param destinationCoordinate
+         * @throws UnexpectedCellException
+         * @throws IncorrectDestinationException
+         * @throws CellIsOccupiedException 
+         */
 	void jump(Board board, Coordinate coordinate, CheckerColor checkerColor, Coordinate destinationCoordinate)
 			throws UnexpectedCellException, IncorrectDestinationException, CellIsOccupiedException;
 
+        /**
+         * 
+         * @return 
+         */
 	GameRules getGameRules();
 
 }

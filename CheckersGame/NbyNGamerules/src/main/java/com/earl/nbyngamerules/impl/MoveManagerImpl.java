@@ -15,11 +15,19 @@ import com.earl.nbyngamerules.MoveManager;
 import com.earl.nbyngamerules.UnexpectedCellException;
 import com.earl.utilities.Coordinate;
 
+/**
+ * 
+ * @author earlharris
+ */
 @Service
 public class MoveManagerImpl implements MoveManager {
 
 	private final GameRules gameRules;
 
+        /**
+         * 
+         * @param gameRules 
+         */
 	public MoveManagerImpl(GameRules gameRules) {
 		this.gameRules = gameRules;
 	}

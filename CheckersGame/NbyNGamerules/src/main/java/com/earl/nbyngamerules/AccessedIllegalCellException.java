@@ -14,6 +14,11 @@ public class AccessedIllegalCellException extends RuntimeException {
 	private final BoardRow boardRow;
 	private final int i;
 
+        /**
+         * 
+         * @param boardRow
+         * @param i 
+         */
 	public AccessedIllegalCellException(BoardRow boardRow, int i) {
 		super("Tried to accessed cell at " + i + ", but only " + (boardRow.coloredCellCode() == 0 ? "even " : "odd")
 				+ " columns are legal.");

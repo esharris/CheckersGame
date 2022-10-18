@@ -13,6 +13,11 @@ public class BoardCoordinate {
 	private final Board board;
 	private final Coordinate coordinate;
 
+        /**
+         * 
+         * @param board
+         * @param coordinate 
+         */
 	public BoardCoordinate(Board board, Coordinate coordinate) {
 		this.board = board;
 		this.coordinate = coordinate;
