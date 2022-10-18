@@ -1,8 +1,5 @@
 package com.earl.nbycheckers3;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -28,64 +25,28 @@ public class TestCountdown2 {
 		resetButton = new JButton();
 		resetButton.setBounds(100, 150, 100, 50);
 		resetButton.setText("Reset");
-		resetButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				countdown.reset();
-			}
-		});
+		resetButton.addActionListener(e -> countdown.reset());
 		frame.add(resetButton);
 
 		stopButton = new JButton();
 		stopButton.setBounds(100, 200, 100, 50);
 		stopButton.setText("Stop");
-		stopButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				countdown.stop();
-			}
-
-		});
+		stopButton.addActionListener(e -> countdown.stop());
 		frame.add(stopButton);
 
 		pauseButton = new JButton();
 		pauseButton.setBounds(100, 250, 100, 50);
 		pauseButton.setText("Pause");
-		pauseButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				countdown.pause();
-			}
-
-		});
+		pauseButton.addActionListener(e -> countdown.pause());
 		frame.add(pauseButton);
 
 		resumeButton = new JButton();
 		resumeButton.setBounds(100, 300, 100, 50);
 		resumeButton.setText("Resume");
-		resumeButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				countdown.resume();
-
-			}
-
-		});
+		resumeButton.addActionListener(e -> countdown.resume());
 		frame.add(resumeButton);
 
-		countdown = new Countdown(10, displayLabel, new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				displayLabel.setText("Timed out!");
-
-			}
-
-		});
+		countdown = new Countdown(10, displayLabel, e -> displayLabel.setText("Timed out!"));
 
 		frame.setSize(300, 400);
 		frame.setLayout(null);

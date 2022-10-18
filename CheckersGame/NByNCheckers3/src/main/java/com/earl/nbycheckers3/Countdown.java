@@ -31,7 +31,7 @@ public class Countdown {
 	Long remainingTime;
 
 	/**
-	 * The date where the timer should stop.
+	 * The time when the timer should stop.
 	 */
 	private Date endDate;
 
@@ -45,46 +45,41 @@ public class Countdown {
 	public Countdown(long duration, JLabel label, ActionListener actionListener) {
 		this.duration = duration;
 
-		thread = new Thread(new Runnable() {
+		thread = new Thread(() -> {
+			try {
+				final Calendar cal0 = Calendar.getInstance();
+				endDate = new Date(cal0.getTimeInMillis() + duration * MILLISECOND_PER_SECOND);
 
-			@Override
-			public void run() {
-				try {
-					final Calendar cal0 = Calendar.getInstance();
-					endDate = new Date(cal0.getTimeInMillis() + duration * MILLISECOND_PER_SECOND);
-
-					active = true;
-					remainingTime = null;
-					shouldTimeout = true;
-					done = false;
-					while (!done) {
-						final Calendar cal = Calendar.getInstance();
-						final Date date = cal.getTime();
-						if (active) {
-							if (remainingTime != null) {
-								endDate = new Date(cal.getTimeInMillis() + remainingTime);
-								remainingTime = null;
-							}
-							label.setText(Long.toString((endDate.getTime() - date.getTime()) / MILLISECOND_PER_SECOND)
-									+ SUFFIX);
-							Thread.sleep(1000);
-							if (date.compareTo(endDate) > 0) {
-								label.setText("0" + SUFFIX);
-								done = true;
-							}
-						} else {
-							if (remainingTime == null) {
-								remainingTime = endDate.getTime() - date.getTime();
-							}
+				active = true;
+				remainingTime = null;
+				shouldTimeout = true;
+				done = false;
+				while (!done) {
+					final Calendar cal = Calendar.getInstance();
+					final Date date = cal.getTime();
+					if (active) {
+						if (remainingTime != null) {
+							endDate = new Date(cal.getTimeInMillis() + remainingTime);
+							remainingTime = null;
+						}
+						label.setText(
+								Long.toString((endDate.getTime() - date.getTime()) / MILLISECOND_PER_SECOND) + SUFFIX);
+						Thread.sleep(1000);
+						if (date.compareTo(endDate) > 0) {
+							label.setText("0" + SUFFIX);
+							done = true;
+						}
+					} else {
+						if (remainingTime == null) {
+							remainingTime = endDate.getTime() - date.getTime();
 						}
 					}
-					if (shouldTimeout) {
-						actionListener.actionPerformed(null);
-					}
-				} catch (InterruptedException e) {
-				} // interval given in milliseconds
-			}
-
+				}
+				if (shouldTimeout) {
+					actionListener.actionPerformed(null);
+				}
+			} catch (InterruptedException e) {
+			} // interval given in milliseconds
 		});
 	}
 

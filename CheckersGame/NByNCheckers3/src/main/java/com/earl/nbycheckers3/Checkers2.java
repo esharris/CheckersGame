@@ -162,7 +162,7 @@ public class Checkers2 {
 	/**
 	 * Used to support mutual exclusion between the game and the countdown.
 	 */
-	private static Object theMonitor = new Object();
+	private static final Object theMonitor = new Object();
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -322,139 +322,117 @@ public class Checkers2 {
 			frame.add(countDownLabel);
 
 			doneButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 50, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
-			doneButton.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					synchronized (theMonitor) {
-						if (!timedOut) {
-							switch (gameState) {
-							case WAIT_FOR_1ST_MOVE_COORDINATE:
-							case WAIT_FOR_2ND_MOVE_COORDINATE:
-								errorLabel.setText("System error: done button should be disabled.");
-								break;
-							case MOVE_VERDICT:
-								if (gameRules.isWinner(board, currentPlayer)) {
-									gameState = GameState.GAME_OVER;
-									messageLabel.setText(currentPlayer + " has won.");
-									errorLabel.setText("");
-									doneButton.setEnabled(false);
-									undoButton.setEnabled(false);
-									resignButton.setEnabled(false);
-									resetButton.setEnabled(true);
-									drawButton.setEnabled(false);
-									countdown.stop();
-								} else {
-									// opponent's turn.
-									countdown.reset();
-									currentPlayer = gameRules.getOpponent(currentPlayer);
-									turnLabel.setText(currentPlayer.toString());
-									board = board.flip();
-									thereIsAJump = moveManager.thereIsAJump(board, currentPlayer);
-									boardCoordinateStack = new Stack<>();
-									refreshGUIBoard(gameRules);
-									waitFor1stMoveCoordinate();
-								}
-								break;
-							default:
-								break;
-							} // switch
-						} // if
-					} // synchronized
-				}
+			doneButton.addActionListener(e -> {
+				synchronized (theMonitor) {
+					if (!timedOut) {
+						switch (gameState) {
+						case WAIT_FOR_1ST_MOVE_COORDINATE:
+						case WAIT_FOR_2ND_MOVE_COORDINATE:
+							errorLabel.setText("System error: done button should be disabled.");
+							break;
+						case MOVE_VERDICT:
+							if (gameRules.isWinner(board, currentPlayer)) {
+								gameState = GameState.GAME_OVER;
+								messageLabel.setText(currentPlayer + " has won.");
+								errorLabel.setText("");
+								doneButton.setEnabled(false);
+								undoButton.setEnabled(false);
+								resignButton.setEnabled(false);
+								resetButton.setEnabled(true);
+								drawButton.setEnabled(false);
+								countdown.stop();
+							} else {
+								// opponent's turn.
+								countdown.reset();
+								currentPlayer = gameRules.getOpponent(currentPlayer);
+								turnLabel.setText(currentPlayer.toString());
+								board = board.flip();
+								thereIsAJump = moveManager.thereIsAJump(board, currentPlayer);
+								boardCoordinateStack = new Stack<>();
+								refreshGUIBoard(gameRules);
+								waitFor1stMoveCoordinate();
+							}
+							break;
+						default:
+							break;
+						} // switch
+					} // if
+				} // synchronized
 			} // action listener declaration
 			);
 			frame.add(doneButton);
 
 			undoButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 100, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
-			undoButton.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					synchronized (theMonitor) {
-						if (!timedOut) {
-							switch (gameState) {
-							case WAIT_FOR_1ST_MOVE_COORDINATE:
-							case WAIT_FOR_2ND_MOVE_COORDINATE:
-								errorLabel.setText("System error: button should have been disabled.");
-								break;
-							case MOVE_VERDICT:
-							case WAIT_FOR_SUBSEQUENT_MOVE_COORDINATE:
-								if (boardCoordinateStack.isEmpty()) {
-									board = savedBoard;
-									refreshGUIBoard(gameRules);
-									waitFor1stMoveCoordinate();
-								} else {
-									final BoardCoordinate boardCoordinate = boardCoordinateStack.peek();
-									board = boardCoordinate.getBoard();
-									sourceCoordinate = boardCoordinate.getCoordinate();
-									refreshGUIBoard(gameRules);
-									boardCoordinateStack.pop();
-									waitForSubsequentMoveCoordinate(true);
-								}
-								break;
-							default:
-								break;
-							} // switch
-						} // if
-					} // synchronize
-				} // action performed
-			} // action listener declaration
+			undoButton.addActionListener(e -> {
+				synchronized (theMonitor) {
+					if (!timedOut) {
+						switch (gameState) {
+						case WAIT_FOR_1ST_MOVE_COORDINATE:
+						case WAIT_FOR_2ND_MOVE_COORDINATE:
+							errorLabel.setText("System error: button should have been disabled.");
+							break;
+						case MOVE_VERDICT:
+						case WAIT_FOR_SUBSEQUENT_MOVE_COORDINATE:
+							if (boardCoordinateStack.isEmpty()) {
+								board = savedBoard;
+								refreshGUIBoard(gameRules);
+								waitFor1stMoveCoordinate();
+							} else {
+								final BoardCoordinate boardCoordinate = boardCoordinateStack.peek();
+								board = boardCoordinate.getBoard();
+								sourceCoordinate = boardCoordinate.getCoordinate();
+								refreshGUIBoard(gameRules);
+								boardCoordinateStack.pop();
+								waitForSubsequentMoveCoordinate(true);
+							}
+							break;
+						default:
+							break;
+						} // switch
+					} // if
+				} // synchronize
+			} // action performed
 			);
 			frame.add(undoButton);
 
 			resignButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 150, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
-			resignButton.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					int result = JOptionPane.showConfirmDialog(null, "Are you sure?");
-					if (result == JOptionPane.YES_NO_OPTION) {
-						synchronized (theMonitor) {
-							resignGame(gameRules, "resigned");
-						}
+			resignButton.addActionListener(e -> {
+				int result = JOptionPane.showConfirmDialog(null, "Are you sure?");
+				if (result == JOptionPane.YES_NO_OPTION) {
+					synchronized (theMonitor) {
+						resignGame(gameRules, "resigned");
 					}
 				}
 			});
 			frame.add(resignButton);
 
 			resetButton.setBounds(OTHER_BUTTON_COL, TOP_MARGIN + 200, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
-			resetButton.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					newGame(gameRules, moveManager);
-				}
-			});
+			resetButton.addActionListener(e -> newGame(gameRules, moveManager));
 			frame.add(resetButton);
 
 			drawButton.setBounds(OTHER_BUTTON_COL, 260, OTHER_BUTTON_WIDTH, OTHER_BUTTON_LENGTH);
-			drawButton.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					board = board.flip();
-					refreshGUIBoard(gameRules);
-					countdown.pause();
-					int result = JOptionPane.showConfirmDialog(null,
-							gameRules.getOpponent(currentPlayer) + " would you accept a draw?");
-					board = board.flip();
-					refreshGUIBoard(gameRules);
-					if (result == JOptionPane.YES_NO_OPTION) {
-						synchronized (theMonitor) {
-							gameState = GameState.GAME_OVER;
-							messageLabel.setText("The game ends in a draw.");
-							errorLabel.setText("");
-							doneButton.setEnabled(false);
-							undoButton.setEnabled(false);
-							resignButton.setEnabled(false);
-							drawButton.setEnabled(false);
-							resetButton.setEnabled(true);
-							countdown.stop();
-						}
-					} else {
-						countdown.resume();
+			drawButton.addActionListener(e -> {
+				board = board.flip();
+				refreshGUIBoard(gameRules);
+				countdown.pause();
+				int result = JOptionPane.showConfirmDialog(null,
+						gameRules.getOpponent(currentPlayer) + " would you accept a draw?");
+				board = board.flip();
+				refreshGUIBoard(gameRules);
+				if (result == JOptionPane.YES_NO_OPTION) {
+					synchronized (theMonitor) {
+						gameState = GameState.GAME_OVER;
+						messageLabel.setText("The game ends in a draw.");
+						errorLabel.setText("");
+						doneButton.setEnabled(false);
+						undoButton.setEnabled(false);
+						resignButton.setEnabled(false);
+						drawButton.setEnabled(false);
+						resetButton.setEnabled(true);
+						countdown.stop();
 					}
+				} else {
+					countdown.resume();
 				}
 			});
 			frame.add(drawButton);
@@ -502,17 +480,13 @@ public class Checkers2 {
 		if (countdown != null) {
 			countdown.stop();
 		}
-		countdown = new Countdown(DURATION, countDownLabel, new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				synchronized (theMonitor) {
-					if (!timedOut) {
-						if (gameState != GameState.GAME_OVER) {
-							resignGame(gameRules, "timed out");
-						}
-						timedOut = true;
+		countdown = new Countdown(DURATION, countDownLabel, e -> {
+			synchronized (theMonitor) {
+				if (!timedOut) {
+					if (gameState != GameState.GAME_OVER) {
+						resignGame(gameRules, "timed out");
 					}
+					timedOut = true;
 				}
 			}
 		});
