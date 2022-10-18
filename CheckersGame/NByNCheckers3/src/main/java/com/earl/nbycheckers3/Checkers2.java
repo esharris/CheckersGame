@@ -27,6 +27,10 @@ import com.earl.nbyngamerules.UnexpectedCellException;
 import com.earl.nbyngamerules.base.BoardCoordinate;
 import com.earl.utilities.Coordinate;
 
+/**
+ * 
+ * @author earlharris
+ */
 public class Checkers2 {
 
 	/**
@@ -164,6 +168,10 @@ public class Checkers2 {
 	 */
 	private static final Object theMonitor = new Object();
 
+	/**
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.scan("com.earl.nbyngamerules.impl");
@@ -455,9 +463,7 @@ public class Checkers2 {
 			frame.setSize(1000, 900);
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		} catch (BeansException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
+		} catch (BeansException | IllegalStateException e) {
 			e.printStackTrace();
 		} finally {
 			context.close();

@@ -6,6 +6,10 @@ import java.util.Date;
 
 import javax.swing.JLabel;
 
+/**
+ * 
+ * @author earlharris
+ */
 public class Countdown {
 
 	private static final long MILLISECOND_PER_SECOND = 1000;
@@ -17,7 +21,7 @@ public class Countdown {
 	 */
 	private final long duration;
 
-	private Thread thread;
+	private final Thread thread;
 
 	/**
 	 * Should the timer continue to count down?
@@ -42,6 +46,12 @@ public class Countdown {
 	 */
 	private boolean done;
 
+	/**
+	 * 
+	 * @param duration
+	 * @param label
+	 * @param actionListener
+	 */
 	public Countdown(long duration, JLabel label, ActionListener actionListener) {
 		this.duration = duration;
 
