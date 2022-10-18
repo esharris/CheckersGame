@@ -29,12 +29,20 @@ import com.earl.nbyngamerules.UnexpectedCellException;
 import com.earl.nbyngamerules.base.BoardCoordinate;
 import com.earl.utilities.Coordinate;
 
+/**
+ * 
+ * @author earlharris
+ */
 public class Checkers {
 
 	private static final int ROW_COUNT = 8;
 	private static final int COLUMN_COUNT = 8;
 	private static final int ROWS_INITIALIZED = 3;
 
+	/**
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.scan("com.earl.nbyncheckers.displayers.impl", "com.earl.nbyngamerules.impl",
@@ -70,7 +78,7 @@ public class Checkers {
 			/**
 			 * Initialize a standard checker game.
 			 */
-			final Container<Board> boardContainer = new Container<Board>(new Board(ROW_COUNT, COLUMN_COUNT, true));
+			final Container<Board> boardContainer = new Container<>(new Board(ROW_COUNT, COLUMN_COUNT, true));
 			gameRules.initialize(boardContainer.getValue(), ROWS_INITIALIZED);
 			CheckerColor currentPlayer = CheckerColor.RED;
 
@@ -131,8 +139,8 @@ public class Checkers {
 			YesOrNoCommandInput drawYesOrNoCommandInput, Container<Board> boardContainer, CheckerColor currentPlayer)
 			throws ResignFromGameException, GameIsDrawException {
 		System.out.println("Move one space.");
-		Container<Board> savedBoardContainer = new Container<Board>();
-		Container<Boolean> doneContainer = new Container<Boolean>(false);
+		Container<Board> savedBoardContainer = new Container<>();
+		Container<Boolean> doneContainer = new Container<>(false);
 		while (!doneContainer.getValue()) {
 			tryToMove(coloredConsoleBoardDisplayer, gameRules, moveManger, preCommandInput, resignYesOrNoCommandInput,
 					drawYesOrNoCommandInput, boardContainer.getValue(), currentPlayer, savedBoardContainer);
@@ -301,8 +309,8 @@ public class Checkers {
 		 * boardCoordinateStack store the previous state (the board) and the current
 		 * destination coordinate.
 		 */
-		final Stack<BoardCoordinate> boardCoordinateStack = new Stack<BoardCoordinate>();
-		Container<Boolean> doneContainer = new Container<Boolean>(false);
+		final Stack<BoardCoordinate> boardCoordinateStack = new Stack<>();
+		Container<Boolean> doneContainer = new Container<>(false);
 		while (!doneContainer.getValue()) {
 			if (boardCoordinateStack.isEmpty()) {
 				/**
@@ -320,8 +328,8 @@ public class Checkers {
 					if (moveManger.canMakeAJump(boardContainer.getValue(), boardCoordinateStack.peek().getCoordinate(),
 							currentPlayer)) {
 						tryToMultiJump(coloredConsoleBoardDisplayer, gameRules, moveManger, multiCommandInput,
-								resignYesOrNoCommandInput, drawYesOrNoCommandInput, boardContainer.getValue(),
-								boardContainer, currentPlayer, boardCoordinateStack);
+								resignYesOrNoCommandInput, drawYesOrNoCommandInput, boardContainer, currentPlayer,
+								boardCoordinateStack);
 					} else {
 						/**
 						 * Status: No more jumps for the current Checker.
@@ -437,7 +445,7 @@ public class Checkers {
 	 */
 	private static void tryToMultiJump(final ColoredConsoleBoardDisplayer coloredConsoleBoardDisplayer,
 			GameRules gameRules, final MoveManager moveManger, final MultiCommandInput multiCommandInput,
-			YesOrNoCommandInput resignYesOrNoCommandInput, YesOrNoCommandInput drawYesOrNoCommandInput, Board board,
+			YesOrNoCommandInput resignYesOrNoCommandInput, YesOrNoCommandInput drawYesOrNoCommandInput,
 			Container<Board> boardContainer, CheckerColor currentPlayer,
 			final Stack<BoardCoordinate> boardCoordinateStack)
 			throws ResignFromGameException, UnexpectedCellException, GameIsDrawException {

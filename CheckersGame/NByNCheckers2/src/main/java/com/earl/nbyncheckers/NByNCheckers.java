@@ -23,6 +23,10 @@ public class NByNCheckers {
 	private static final Board board1 = new Board(3, 4, false);
 	private static final Board checkerBoard = new Board(8, 8, true);
 
+        /**
+         * 
+         * @param args 
+         */
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.scan("com.earl.nbyncheckers.displayers.impl", "com.earl.nbyngamerules.impl");
@@ -52,9 +56,7 @@ public class NByNCheckers {
 			System.out.println();
 			System.out.println(coloredConsoleBoardDisplayerImpl.display(board2));
 			System.out.println();
-		} catch (BeansException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
+		} catch (BeansException | IllegalStateException e) {
 			e.printStackTrace();
 		} finally {
 			context.close();
